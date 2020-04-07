@@ -16,8 +16,8 @@ function formSubmit(){
 
 function checkCookie(){
 	document.forms[0]['sessionid'].value = getCookie('SESSIONID');
-	alert(getCookie('SESSIONID'));
-	alert(document.forms[0]['sessionid'].value);
+//	alert(getCookie('SESSIONID'));
+//	alert(document.forms[0]['sessionid'].value);
 }
 </script>
 
