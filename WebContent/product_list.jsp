@@ -41,7 +41,12 @@ function checkCookie(){
 <% } %>
 	<div align="center">
 		<h1>
-		Welcome! <%= request.getSession().getAttribute("current_user")!=null?((Customer)request.getSession().getAttribute("current_user")).getFirstName():""%>
+		Welcome! 
+		<% if (request.getSession().getAttribute("current_user")!=null){ %>
+		<%= ((Customer)request.getSession().getAttribute("current_user")).getFirstName()%>
+		<% }else{ %>
+		<a href="login.jsp">Login</a>
+		<%} %>
 		</h1>
 	</div>
 	<div align="right">
