@@ -18,7 +18,7 @@ public class ShoppingCartDao extends MasterDao {
 	
     public ShoppingCart getShoppingCart(String sessionId) throws Exception {
     	
-    	Connection conn = null;
+    	//Connection conn = null;
     	ProductDao productDao = null;
 
     	String sGET_SHOPPING_CART_SQL = "SELECT session_id, email, product_code, quantity, date_modified FROM shopping_cart WHERE session_id = ?;";
@@ -27,11 +27,18 @@ public class ShoppingCartDao extends MasterDao {
         ShoppingCart shoppingCart = null;
         CartItem cartItem = null;
 
-        try {        
-        	conn = getConnection();
+        try (Connection conn = getConnection();
 
 			// Step 2:Create a statement using connection object
             PreparedStatement preparedStatement = conn.prepareStatement(sGET_SHOPPING_CART_SQL);
+        	)
+        {   
+//        try {        
+//        
+//        	conn = getConnection();
+//
+//			// Step 2:Create a statement using connection object
+//            PreparedStatement preparedStatement = conn.prepareStatement(sGET_SHOPPING_CART_SQL);
             preparedStatement.setString(1, sessionId);
         	
             System.out.println(preparedStatement);
@@ -75,16 +82,22 @@ public class ShoppingCartDao extends MasterDao {
 	
 	public CartItem getCartItem(String sessionId, CartItem cartItem) throws ClassNotFoundException {
     	
-    	Connection conn = null;  
+    	//Connection conn = null;  
     	CartItem storedItem = null;
         
     	String sGET_CART_ITEM_SQL = "SELECT session_id, email, product_code, quantity, date_modified FROM shopping_cart WHERE session_id = ? AND product_code = ?;";
 
-        try {        
-        	conn = getConnection();
+        try (Connection conn = getConnection();
 
 			// Step 2:Create a statement using connection object
             PreparedStatement preparedStatement = conn.prepareStatement(sGET_CART_ITEM_SQL);
+        	)
+        {  
+//        try {
+//        	conn = getConnection();
+//
+//			// Step 2:Create a statement using connection object
+//            PreparedStatement preparedStatement = conn.prepareStatement(sGET_CART_ITEM_SQL);
             preparedStatement.setString(1, sessionId);
             preparedStatement.setInt(2, cartItem.getProduct().getProductCode());
 
@@ -110,17 +123,24 @@ public class ShoppingCartDao extends MasterDao {
 	public boolean addCartItem(String sessionId, Customer customer, CartItem cartItem) throws ClassNotFoundException {
     	
     	int result = 0;
-    	Connection conn = null;
+    	//Connection conn = null;
         java.util.Date utilDate = new java.util.Date();
         java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
         
     	String sINSERT_CART_ITEM_SQL = "INSERT INTO shopping_cart (session_id, email, product_code, quantity, date_modified) VALUES (?,?,?,?,?);";
 
-        try {        
-        	conn = getConnection();
+        try (Connection conn = getConnection();
 
 			// Step 2:Create a statement using connection object
             PreparedStatement preparedStatement = conn.prepareStatement(sINSERT_CART_ITEM_SQL);
+        	)
+        { 
+//        try {        
+//        
+//        	conn = getConnection();
+//
+//			// Step 2:Create a statement using connection object
+//            PreparedStatement preparedStatement = conn.prepareStatement(sINSERT_CART_ITEM_SQL);
             preparedStatement.setString(1, sessionId);
             preparedStatement.setString(2, customer!=null?customer.getEmail():null);
             preparedStatement.setInt(3, cartItem.getProduct().getProductCode());
@@ -158,17 +178,23 @@ public class ShoppingCartDao extends MasterDao {
 	public boolean updateCartItem(String sessionId, CartItem cartItem) throws ClassNotFoundException {
     	
     	int result = 0;
-    	Connection conn = null;
+    	//Connection conn = null;
         java.util.Date utilDate = new java.util.Date();
         java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
         
     	String sUPDATE_CART_ITEM_SQL = "UPDATE shopping_cart SET quantity = ?, date_modified = ? where session_id = ? and product_code = ?;";
 
-        try {        
-        	conn = getConnection();
+        try (Connection conn = getConnection();
 
 			// Step 2:Create a statement using connection object
             PreparedStatement preparedStatement = conn.prepareStatement(sUPDATE_CART_ITEM_SQL);
+        	)
+        { 
+//    	try {        
+//        	conn = getConnection();
+//
+//			// Step 2:Create a statement using connection object
+//            PreparedStatement preparedStatement = conn.prepareStatement(sUPDATE_CART_ITEM_SQL);
             preparedStatement.setInt(1, cartItem.getQuantity());
             preparedStatement.setTimestamp(2, sqlTS);
             preparedStatement.setString(3, sessionId);
@@ -195,15 +221,21 @@ public class ShoppingCartDao extends MasterDao {
     public boolean removeCartItem(String sessionId, CartItem cartItem) throws ClassNotFoundException {
     	
     	int result = 0;
-    	Connection conn = null;
+//    	Connection conn = null;
         
     	String sDELETE_CART_ITEM_SQL = "DELETE FROM shopping_cart where session_id = ? and product_code = ?;";
 
-        try {        
-        	conn = getConnection();
+        try (Connection conn = getConnection();
 
 			// Step 2:Create a statement using connection object
             PreparedStatement preparedStatement = conn.prepareStatement(sDELETE_CART_ITEM_SQL);
+        	)
+        { 
+//    	try {        
+//        	conn = getConnection();
+//
+//			// Step 2:Create a statement using connection object
+//            PreparedStatement preparedStatement = conn.prepareStatement(sDELETE_CART_ITEM_SQL);
             preparedStatement.setString(1, sessionId);
             preparedStatement.setInt(2, cartItem.getProduct().getProductCode());
 
@@ -239,13 +271,15 @@ public class ShoppingCartDao extends MasterDao {
     	String sUPDATE_CART_SQL = "UPDATE customer_order SET amount_total = ?, item_total = ? WHERE order_id = ?;";
     	String sDELETE_CART_SQL = "DELETE FROM shopping_cart WHERE session_id = ?;";
     	
-        try {        
+    	try {        
         	conn = getConnection();
         	conn.setAutoCommit(false);
 
+			// Step 2:Create a statement using connection object
+            preparedStatement = conn.prepareStatement(sINSERT_ORDER_SQL);
 			// 1. Insert Order
             preparedStatement = conn.prepareStatement(sINSERT_ORDER_SQL);
-            preparedStatement.setString(1, Long.toString(utilDate.getTime()));
+            preparedStatement.setString(1, Long.toString(utilDate.getTime())+cart.getSessionId());
             preparedStatement.setString(2, cart.getEmail());
             preparedStatement.setTimestamp(3, sqlTS);
 
@@ -261,7 +295,7 @@ public class ShoppingCartDao extends MasterDao {
             		cartItem =  cartItems.get(i); 
             		item_total += cartItem.getQuantity();
             		amount_total += cartItem.getQuantity()*cartItem.getProduct().getProductPrice();
-                    preparedStatement.setString(1, Long.toString(utilDate.getTime()));
+                    preparedStatement.setString(1, Long.toString(utilDate.getTime())+cart.getSessionId());
                     preparedStatement.setInt(2, cartItem.getProduct().getProductCode());
                     preparedStatement.setDouble(3, cartItem.getProduct().getProductPrice());   
                     preparedStatement.setInt(4, cartItem.getQuantity());
@@ -275,7 +309,7 @@ public class ShoppingCartDao extends MasterDao {
             preparedStatement = conn.prepareStatement(sUPDATE_CART_SQL);
             preparedStatement.setDouble(1, amount_total);
             preparedStatement.setInt(2, item_total);
-            preparedStatement.setString(3, Long.toString(utilDate.getTime()));
+            preparedStatement.setString(3, Long.toString(utilDate.getTime())+cart.getSessionId());
 
             System.out.println(preparedStatement);
             result = preparedStatement.executeUpdate();
@@ -293,8 +327,8 @@ public class ShoppingCartDao extends MasterDao {
             conn.commit();
             conn.close();
             success = true;
-            
-        } catch (Exception ex) {
+
+          } catch (Exception ex) {
 
         	// process sql exception
             ex.printStackTrace();

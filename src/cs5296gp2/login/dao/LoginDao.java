@@ -12,15 +12,21 @@ public class LoginDao extends MasterDao {
 
 	public boolean validate(Customer customer) throws ClassNotFoundException {
 		
-    	Connection conn = null;
+    	//Connection conn = null;
 		boolean login_status = false;
 		String sVALIDATE_USER_SQL = "select first_name, last_name from customer where email = ? and password = ? ";
 
-        try {        
-        	conn = getConnection();
+        try (Connection conn = getConnection();
 
 			// Step 2:Create a statement using connection object
-			PreparedStatement preparedStatement = conn.prepareStatement(sVALIDATE_USER_SQL);
+            PreparedStatement preparedStatement = conn.prepareStatement(sVALIDATE_USER_SQL);
+        	)
+        {        
+//        try {        
+//        	conn = getConnection();
+//
+//			// Step 2:Create a statement using connection object
+//			PreparedStatement preparedStatement = conn.prepareStatement(sVALIDATE_USER_SQL);
 			preparedStatement.setString(1, customer.getEmail());
 			preparedStatement.setString(2, customer.getPassword());
 

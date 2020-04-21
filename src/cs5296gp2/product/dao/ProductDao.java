@@ -13,19 +13,18 @@ public class ProductDao extends MasterDao {
 	
     public ArrayList<Product> getProductList() throws ClassNotFoundException {
     	
-    	Connection conn = null;
-
     	String sGET_PRODUCT_LIST_SQL = "SELECT product_code, product_category, product_name, image_file, product_price FROM product;";
 
         ResultSet result = null;
         Product product = null;
         ArrayList<Product> productList = new ArrayList<Product>() ;
 
-        try {        
-        	conn = getConnection();
+        try (Connection conn = getConnection();
 
 			// Step 2:Create a statement using connection object
             PreparedStatement preparedStatement = conn.prepareStatement(sGET_PRODUCT_LIST_SQL);
+        	)
+        {        
         	
             System.out.println(preparedStatement);
             // Step 3: Execute the query 
@@ -52,18 +51,16 @@ public class ProductDao extends MasterDao {
     
     public Product getProduct(int product_code) throws ClassNotFoundException {
     	
-    	Connection conn = null;
-
     	String sGET_PRODUCT_ITEM_SQL = "SELECT product_code, product_category, product_name, image_file, product_price FROM product WHERE product_code = ?;";
 
         ResultSet result = null;
         Product product = null;
 
-        try {        
-        	conn = getConnection();
+        try (Connection conn = getConnection();
 
-			// Step 2:Create a statement using connection object
-            PreparedStatement preparedStatement = conn.prepareStatement(sGET_PRODUCT_ITEM_SQL);
+    			// Step 2:Create a statement using connection object
+                PreparedStatement preparedStatement = conn.prepareStatement(sGET_PRODUCT_ITEM_SQL);
+            ){        
             preparedStatement.setInt(1, product_code);
             
             System.out.println(preparedStatement);
