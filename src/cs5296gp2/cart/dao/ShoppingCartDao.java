@@ -259,7 +259,6 @@ public class ShoppingCartDao extends MasterDao {
     	boolean success = false;
     	int result = 0;
     	Connection conn = null;
-    	PreparedStatement preparedStatement = null;
         java.util.Date utilDate = new java.util.Date();
         java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
         CartItem cartItem = null;
@@ -275,10 +274,8 @@ public class ShoppingCartDao extends MasterDao {
         	conn = getConnection();
         	conn.setAutoCommit(false);
 
-			// Step 2:Create a statement using connection object
-            preparedStatement = conn.prepareStatement(sINSERT_ORDER_SQL);
 			// 1. Insert Order
-            preparedStatement = conn.prepareStatement(sINSERT_ORDER_SQL);
+        	PreparedStatement preparedStatement = conn.prepareStatement(sINSERT_ORDER_SQL);
             preparedStatement.setString(1, Long.toString(utilDate.getTime())+cart.getSessionId());
             preparedStatement.setString(2, cart.getEmail());
             preparedStatement.setTimestamp(3, sqlTS);
@@ -288,41 +285,40 @@ public class ShoppingCartDao extends MasterDao {
             preparedStatement.close();
             
             // Insert Order Details
-            if (result > 0) {
-        		preparedStatement = conn.prepareStatement(sINSERT_DETAIL_SQL);
-        		ArrayList<CartItem> cartItems = cart.getCartItems();
-            	for (int i=0; i < cartItems.size(); i++) {
-            		cartItem =  cartItems.get(i); 
-            		item_total += cartItem.getQuantity();
-            		amount_total += cartItem.getQuantity()*cartItem.getProduct().getProductPrice();
-                    preparedStatement.setString(1, Long.toString(utilDate.getTime())+cart.getSessionId());
-                    preparedStatement.setInt(2, cartItem.getProduct().getProductCode());
-                    preparedStatement.setDouble(3, cartItem.getProduct().getProductPrice());   
-                    preparedStatement.setInt(4, cartItem.getQuantity());
-                    preparedStatement.addBatch();
-            	}
-            	preparedStatement.executeBatch();
-                preparedStatement.close();            
-            }
-            
+    		ArrayList<CartItem> cartItems = cart.getCartItems();
+        	for (int i=0; i < cartItems.size(); i++) {
+        		PreparedStatement ps = conn.prepareStatement(sINSERT_DETAIL_SQL);
+                cartItem =  cartItems.get(i); 
+        		item_total += cartItem.getQuantity();
+        		amount_total += cartItem.getQuantity()*cartItem.getProduct().getProductPrice();
+        		ps.setString(1, Long.toString(utilDate.getTime())+cart.getSessionId());
+        		ps.setInt(2, cartItem.getProduct().getProductCode());
+        		ps.setDouble(3, cartItem.getProduct().getProductPrice());   
+        		ps.setInt(4, cartItem.getQuantity());
+                //preparedStatement.addBatch();
+                result = ps.executeUpdate();                
+                ps.close();            
+        	}
+        	//preparedStatement.executeBatch();
+                        
 			// 3. Update Order
-            preparedStatement = conn.prepareStatement(sUPDATE_CART_SQL);
-            preparedStatement.setDouble(1, amount_total);
-            preparedStatement.setInt(2, item_total);
-            preparedStatement.setString(3, Long.toString(utilDate.getTime())+cart.getSessionId());
+            PreparedStatement psUpdateOrder = conn.prepareStatement(sUPDATE_CART_SQL);
+            psUpdateOrder.setDouble(1, amount_total);
+            psUpdateOrder.setInt(2, item_total);
+            psUpdateOrder.setString(3, Long.toString(utilDate.getTime())+cart.getSessionId());
 
-            System.out.println(preparedStatement);
-            result = preparedStatement.executeUpdate();
-            preparedStatement.close();
+            System.out.println(psUpdateOrder);
+            result = psUpdateOrder.executeUpdate();
+            psUpdateOrder.close();
             
 			// 4. Remove from Cart
-            preparedStatement = conn.prepareStatement(sDELETE_CART_SQL);
-            preparedStatement.clearParameters();
-            preparedStatement.setString(1, cart.getSessionId());
+            PreparedStatement psRemoveCart = conn.prepareStatement(sDELETE_CART_SQL);
+            psRemoveCart.clearParameters();
+            psRemoveCart.setString(1, cart.getSessionId());
 
-            System.out.println(preparedStatement);
-            result = preparedStatement.executeUpdate();
-            preparedStatement.close();
+            System.out.println(psRemoveCart);
+            result = psRemoveCart.executeUpdate();
+            psRemoveCart.close();
             
             conn.commit();
             conn.close();
@@ -335,6 +331,7 @@ public class ShoppingCartDao extends MasterDao {
             success = false;
             
             try {
+            	
             	if (conn != null) {
                 	conn.rollback();
                 	conn.close();
